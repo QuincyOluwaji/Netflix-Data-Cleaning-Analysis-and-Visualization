@@ -51,7 +51,7 @@ where listed_in is null
 SELECT COUNT(*) from netflix_titles$
 where description is null
 
----updating null fields
+---updating null field (country)
 UPDATE netflix_titles$ 
 SET country = 'Not Given'
 WHERE country is NULL
@@ -110,7 +110,7 @@ from netflix_titles$
 group by listed_in
 order by frequency desc
 
----- to see if any cast worked with the same director more than once
+---- check to see if any cast worked with the same director more than once
 select CAST, director, COUNT(*)
 from netflix_titles$
 group by cast, director
@@ -118,7 +118,7 @@ having count(*) > 1
 order by cast
 
 ---- country column is concatenated and needs to be updated
-WITH Source AS (
+WITH real_country AS (
     SELECT
       t.show_id,
       t.title,
@@ -128,14 +128,14 @@ WITH Source AS (
     CROSS APPLY STRING_SPLIT(t.country, ',') cat
 )
 MERGE netflix_titles$ t
-USING Source s
-ON s.show_id = t.show_id AND s.rn = 1
+USING real_country r
+ON r.show_id = t.show_id AND r.rn = 1
 WHEN MATCHED THEN
   UPDATE
-  SET country = s.country
+  SET country = r.country
 WHEN NOT MATCHED THEN
   INSERT (show_id, title, country)
-  VALUES (s.show_id, s.title, s.country);
+  VALUES (r.show_id, r.title,Â r.country);
 
 ---drop unnecessary columns
 drop column cast
