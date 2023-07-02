@@ -123,7 +123,7 @@ WITH real_country AS (
       t.show_id,
       t.title,
       country = TRIM(cat.value),
-      rn = ROW_NUMBER() OVER (PARTITION BY show_id ORDER BY (SELECT NULL))
+      ROW_NUMBER() OVER (PARTITION BY show_id ORDER BY (SELECT NULL)) as rn
     FROM netflix_titles$ t
     CROSS APPLY STRING_SPLIT(t.country, ',') cat
 )
